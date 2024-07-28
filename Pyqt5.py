@@ -2,7 +2,72 @@ import sys
 import os
 import ast
 from difflib import SequenceMatcher
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, QDialog, QScrollArea, QVBoxLayout, QHBoxLayout, QDialog, QRadioButton, QCheckBox, QPushButton
+
+class FileSelectionDialog(QDialog):
+    def __init__(self, files, parent=None):
+        super().__init__(parent)
+        self.files = files
+        self.selected_base_file = None
+        self.selected_compare_files = []
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('Select Files for Comparison')
+        self.setGeometry(100, 100, 600, 400)
+
+        layout = QVBoxLayout()
+        
+        scroll_area = QScrollArea(self)
+        scroll_content = QWidget()
+        scroll_layout = QHBoxLayout(scroll_content)
+
+        self.base_file_buttons = []
+        self.compare_file_buttons = []
+
+        base_file_layout = QVBoxLayout()
+        compare_file_layout = QVBoxLayout()
+
+        for file in self.files:
+            base_radio = QRadioButton(file)
+            base_radio.toggled.connect(self.on_base_file_selected)
+            self.base_file_buttons.append(base_radio)
+            base_file_layout.addWidget(base_radio)
+
+            compare_check = QCheckBox(file)
+            compare_check.stateChanged.connect(self.on_compare_file_selected)
+            self.compare_file_buttons.append(compare_check)
+            compare_file_layout.addWidget(compare_check)
+
+        scroll_layout.addLayout(base_file_layout)
+        scroll_layout.addLayout(compare_file_layout)
+
+        scroll_area.setWidget(scroll_content)
+        scroll_area.setWidgetResizable(True)
+
+        layout.addWidget(scroll_area)
+
+        ok_button = QPushButton('OK', self)
+        ok_button.clicked.connect(self.on_ok)
+        layout.addWidget(ok_button)
+
+        self.setLayout(layout)
+
+    def on_base_file_selected(self):
+        radio_button = self.sender()
+        if radio_button.isChecked():
+            self.selected_base_file = radio_button.text()
+
+    def on_compare_file_selected(self):
+        check_box = self.sender()
+        if check_box.isChecked():
+            self.selected_compare_files.append(check_box.text())
+        else:
+            self.selected_compare_files.remove(check_box.text())
+
+    def on_ok(self):
+        self.accept()
 
 class LoginWindow(QMainWindow):
     def __init__(self):
@@ -58,9 +123,31 @@ class MainWindow(QMainWindow):
         options = QFileDialog.Options()
         files, _ = QFileDialog.getOpenFileNames(self, "Import Code Files", "", "Python Files (*.py);;All Files (*)", options=options)
         if len(files) >= 2:
-            self.check_duplication(files)
+            dialog = FileSelectionDialog(files, self)
+            if dialog.exec_():
+                base_file = dialog.selected_base_file
+                compare_files = dialog.selected_compare_files
+                if base_file and compare_files:
+                    duplicates = []
+                    self.compare_files(base_file, compare_files, duplicates)
+                    self.display_results(duplicates)
         else:
             self.statusBar().showMessage('Please select at least 2 files')
+
+    def compare_files(self, base_file, compare_files, duplicates):
+        content1 = read_file(base_file)
+        for compare_file in compare_files:
+            content2 = read_file(compare_file)
+            overall_similarity = calculate_overall_similarity(content1.splitlines(), content2.splitlines())
+            duplicates.append((base_file, compare_file, overall_similarity))
+            similar_blocks, lines1, lines2 = find_similar_blocks(content1, content2)
+            extended_blocks = []
+            for block1_idx, block2_idx, similarity in similar_blocks:
+                length1, length2 = try_expand_block(lines1, lines2, block1_idx, block2_idx, 0.9)
+                length = min(length1, length2)
+                extended_blocks.append((block1_idx, block2_idx, length))
+            highlighted_content1, highlighted_content2 = highlight_code(content1, content2, extended_blocks, lines1, lines2)
+            self.show_diff(highlighted_content1, highlighted_content2)
 
     def check_duplication(self, files):
         duplicates = []
