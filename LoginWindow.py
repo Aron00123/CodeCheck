@@ -50,7 +50,7 @@ class LoginWindow(QMainWindow):
         if username in user_data and user_data[username] == password:
             login_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             print(f'User {username} logged in at {login_time}')
-            self.main_window = MainWindow(login_time)
+            self.main_window = MainWindow(username, login_time)
             self.main_window.show()
             self.close()
         else:

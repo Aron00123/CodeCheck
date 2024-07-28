@@ -1,11 +1,15 @@
-from FileSelectionDialog import FileSelectionDialog
 import ast
+import json
+import datetime
 from difflib import SequenceMatcher
+from FileSelectionDialog import FileSelectionDialog
+from HistoryWindow import HistoryWindow
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, QVBoxLayout, QPushButton
 
 class MainWindow(QMainWindow):
-    def __init__(self, login_time):
+    def __init__(self, username, login_time):
         super().__init__()
+        self.username = username
         self.login_time = login_time
         self.initUI()
 
@@ -19,6 +23,10 @@ class MainWindow(QMainWindow):
         self.import_button = QPushButton('Import Code Files', self)
         self.import_button.clicked.connect(self.import_files)
         layout.addWidget(self.import_button)
+
+        self.history_button = QPushButton('History', self)
+        self.history_button.clicked.connect(self.show_history)
+        layout.addWidget(self.history_button)
 
         self.login_time_label = QLabel(f'Login Time: {self.login_time}', self)
         layout.addWidget(self.login_time_label)
@@ -52,6 +60,7 @@ class MainWindow(QMainWindow):
             content2 = read_file(compare_file)
             overall_similarity = calculate_overall_similarity(content1.splitlines(), content2.splitlines())
             duplicates.append((base_file, compare_file, overall_similarity))
+        save_history(self.username, base_file, compare_files)
 
     def display_results(self, duplicates):
         self.result_list.clear()
@@ -69,7 +78,7 @@ class MainWindow(QMainWindow):
             length1, length2 = try_expand_block(lines1, lines2, block1_idx, block2_idx, 0.9)
             length = min(length1, length2)
             extended_blocks.append((block1_idx, block2_idx, length))
-        highlighted_content1, highlighted_content2 = highlight_code(content1, content2, extended_blocks, lines1, lines2)
+        highlighted_content1, highlighted_content2 = highlight_code(extended_blocks, lines1, lines2)
         self.show_diff(highlighted_content1, highlighted_content2)
 
     def show_diff(self, highlighted_content1, highlighted_content2):
@@ -93,6 +102,10 @@ class MainWindow(QMainWindow):
         diff_window.setCentralWidget(container)
 
         diff_window.show()
+    
+    def show_history(self):
+        self.history_window = HistoryWindow(self.username)
+        self.history_window.show()
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -168,3 +181,23 @@ def calculate_overall_similarity(lines1, lines2):
         similarities.append(best_similarity)
 
     return sum(similarities) / len(similarities)
+
+def save_history(username, base_file, compare_files):
+    history = {}
+    try:
+        with open('history.json', 'r') as file:
+            history = json.load(file)
+    except FileNotFoundError:
+        pass
+    
+    if username not in history:
+        history[username] = []
+    
+    history[username].append({
+        'base_file': base_file,
+        'compare_files': compare_files,
+        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    })
+    
+    with open('history.json', 'w') as file:
+        json.dump(history, file)
