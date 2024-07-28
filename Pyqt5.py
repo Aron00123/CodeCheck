@@ -140,26 +140,6 @@ class MainWindow(QMainWindow):
             content2 = read_file(compare_file)
             overall_similarity = calculate_overall_similarity(content1.splitlines(), content2.splitlines())
             duplicates.append((base_file, compare_file, overall_similarity))
-            similar_blocks, lines1, lines2 = find_similar_blocks(content1, content2)
-            extended_blocks = []
-            for block1_idx, block2_idx, similarity in similar_blocks:
-                length1, length2 = try_expand_block(lines1, lines2, block1_idx, block2_idx, 0.9)
-                length = min(length1, length2)
-                extended_blocks.append((block1_idx, block2_idx, length))
-            highlighted_content1, highlighted_content2 = highlight_code(content1, content2, extended_blocks, lines1, lines2)
-            self.show_diff(highlighted_content1, highlighted_content2)
-
-    def check_duplication(self, files):
-        duplicates = []
-        for i in range(len(files)):
-            for j in range(i + 1, len(files)):
-                content1 = read_file(files[i])
-                content2 = read_file(files[j])
-                overall_similarity = calculate_overall_similarity(content1.splitlines(), content2.splitlines())
-                # if overall_similarity > 0.8:  # Assuming 80% similarity as duplicate
-                #     duplicates.append((files[i], files[j], overall_similarity))
-                duplicates.append((files[i], files[j], overall_similarity))
-        self.display_results(duplicates)
 
     def display_results(self, duplicates):
         self.result_list.clear()
