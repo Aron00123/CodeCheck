@@ -1,37 +1,30 @@
 import ast
 from difflib import SequenceMatcher
 
-
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.read()
 
-
 def node_to_string(node):
     return ast.dump(node)
 
-
 def calculate_node_similarity(block1, block2):
     return SequenceMatcher(None, block1, block2).ratio()
-
 
 def find_similar_blocks(content1, content2, threshold=0.9):
     lines1 = content1.splitlines()
     lines2 = content2.splitlines()
 
-    blocks1 = ["\n".join(lines1[i:i + 3]) for i in range(len(lines1) - 2)]
-    blocks2 = ["\n".join(lines2[i:i + 3]) for i in range(len(lines2) - 2)]
-
     similar_blocks = []
     used_blocks2 = set()
 
-    for i, block1 in enumerate(blocks1):
+    for i, line1 in enumerate(lines1):
         best_match = None
         best_similarity = 0
-        for j, block2 in enumerate(blocks2):
+        for j, line2 in enumerate(lines2):
             if j in used_blocks2:
                 continue
-            similarity = calculate_node_similarity(block1, block2)
+            similarity = calculate_node_similarity(line1, line2)
             if similarity >= threshold and similarity > best_similarity:
                 best_similarity = similarity
                 best_match = j
@@ -41,10 +34,9 @@ def find_similar_blocks(content1, content2, threshold=0.9):
 
     return similar_blocks, lines1, lines2
 
-
 def try_expand_block(lines1, lines2, block1_start, block2_start, threshold):
-    block1_end = block1_start + 3
-    block2_end = block2_start + 3
+    block1_end = block1_start + 1
+    block2_end = block2_start + 1
 
     while block1_end < len(lines1) and block2_end < len(lines2):
         block1 = "\n".join(lines1[block1_start:block1_end + 1])
@@ -59,7 +51,6 @@ def try_expand_block(lines1, lines2, block1_start, block2_start, threshold):
 
     return block1_end - block1_start, block2_end - block2_start
 
-
 def highlight_code(content1, content2, similar_blocks, lines1, lines2):
     highlighted_lines1 = lines1[:]
     highlighted_lines2 = lines2[:]
@@ -72,22 +63,18 @@ def highlight_code(content1, content2, similar_blocks, lines1, lines2):
 
     return '\n'.join(highlighted_lines1), '\n'.join(highlighted_lines2)
 
-
 def calculate_overall_similarity(lines1, lines2):
-    blocks1 = ["\n".join(lines1[i:i + 3]) for i in range(len(lines1) - 2)]
-    blocks2 = ["\n".join(lines2[i:i + 3]) for i in range(len(lines2) - 2)]
     similarities = []
 
-    for block1 in blocks1:
+    for line1 in lines1:
         best_similarity = 0
-        for block2 in blocks2:
-            similarity = calculate_node_similarity(block1, block2)
+        for line2 in lines2:
+            similarity = calculate_node_similarity(line1, line2)
             if similarity > best_similarity:
                 best_similarity = similarity
         similarities.append(best_similarity)
 
     return sum(similarities) / len(similarities)
-
 
 def main(file1, file2, threshold=0.9):
     content1 = read_file(file1)
@@ -110,7 +97,6 @@ def main(file1, file2, threshold=0.9):
     print(highlighted_content1)
     print("\nFile 2 with highlighted similar blocks:")
     print(highlighted_content2)
-
 
 if __name__ == "__main__":
     file1 = "file1.py"
