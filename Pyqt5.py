@@ -1,6 +1,7 @@
 import sys
 import os
 import ast
+import datetime
 from difflib import SequenceMatcher
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, QDialog, QScrollArea, QVBoxLayout, QHBoxLayout, QDialog, QRadioButton, QCheckBox, QPushButton
 
@@ -94,28 +95,51 @@ class LoginWindow(QMainWindow):
 
     def handle_login(self):
         username = self.username.text()
-        print(f'User {username} logged in')
-        self.main_window = MainWindow()
+        login_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print(f'User {username} logged in at {login_time}')
+        self.main_window = MainWindow(login_time)
         self.main_window.show()
         self.close()
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, login_time):
         super().__init__()
+        self.login_time = login_time
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle('Code Duplication Checker')
         self.setGeometry(100, 100, 800, 600)
 
+        # self.import_button = QPushButton('Import Code Files', self)
+        # self.import_button.clicked.connect(self.import_files)
+        # self.import_button.move(50, 50)
+
+        # self.result_list = QListWidget(self)
+        # self.result_list.move(50, 100)
+        # self.result_list.resize(700, 400)
+        # self.result_list.itemClicked.connect(self.view_details)
+
+        # self.login_time_label = QLabel(f'Login Time: {self.login_time}', self)
+        # self.login_time_label.move(50, 100)
+
+        # self.statusBar().showMessage('Ready')
+
+        central_widget = QWidget()
+        layout = QVBoxLayout(central_widget)
+
         self.import_button = QPushButton('Import Code Files', self)
         self.import_button.clicked.connect(self.import_files)
-        self.import_button.move(50, 50)
+        layout.addWidget(self.import_button)
+
+        self.login_time_label = QLabel(f'Login Time: {self.login_time}', self)
+        layout.addWidget(self.login_time_label)
 
         self.result_list = QListWidget(self)
-        self.result_list.move(50, 100)
-        self.result_list.resize(700, 400)
         self.result_list.itemClicked.connect(self.view_details)
+        layout.addWidget(self.result_list)
+
+        self.setCentralWidget(central_widget)
 
         self.statusBar().showMessage('Ready')
 
