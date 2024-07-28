@@ -38,14 +38,6 @@ class LoginWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-    # def handle_login(self):
-    #     username = self.username.text()
-    #     login_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    #     print(f'User {username} logged in at {login_time}')
-    #     self.main_window = MainWindow(login_time)
-    #     self.main_window.show()
-    #     self.close()
-
     def handle_login(self):
         username = self.username.text().strip()
         password = self.password.text().strip()

@@ -55,7 +55,6 @@ class MainWindow(QMainWindow):
 
     def display_results(self, duplicates):
         self.result_list.clear()
-        print(duplicates)
         for file1, file2, similarity in duplicates:
             self.result_list.addItem(f'{file1} and {file2} are {similarity * 100:.2f}% similar')
 
@@ -145,7 +144,7 @@ def try_expand_block(lines1, lines2, block1_start, block2_start, threshold):
 
     return block1_end - block1_start, block2_end - block2_start
 
-def highlight_code(content1, content2, similar_blocks, lines1, lines2):
+def highlight_code(similar_blocks, lines1, lines2):
     highlighted_lines1 = lines1[:]
     highlighted_lines2 = lines2[:]
 
