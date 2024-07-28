@@ -1,1 +1,0 @@
-print("This is GUI/test.py")
