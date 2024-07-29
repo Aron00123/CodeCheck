@@ -3,9 +3,15 @@ import astor
 import json
 import datetime
 from difflib import SequenceMatcher
+
+from PyQt5.QtCore import Qt
+
 from FileSelectionDialog import FileSelectionDialog
 from HistoryWindow import HistoryWindow
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, \
+    QVBoxLayout, QPushButton, QListWidgetItem
+
+SUS_THRESHOLD = 0.6 # float between 0 and 1
 
 class MainWindow(QMainWindow):
     def __init__(self, username, login_time):
@@ -31,6 +37,9 @@ class MainWindow(QMainWindow):
 
         self.login_time_label = QLabel(f'Login Time: {self.login_time}', self)
         layout.addWidget(self.login_time_label)
+
+        self.result_label = QLabel('Items in red are suspicious, please check manually.', self)
+        layout.addWidget(self.result_label)
 
         self.result_list = QListWidget(self)
         self.result_list.itemClicked.connect(self.view_details)
@@ -66,7 +75,9 @@ class MainWindow(QMainWindow):
     def display_results(self, duplicates):
         self.result_list.clear()
         for file1, file2, similarity in duplicates:
-            self.result_list.addItem(f'{file1} and {file2} are {similarity * 100:.2f}% similar')
+            item = QListWidgetItem(f'{file1} and {file2} are {similarity * 100:.2f}% similar', self.result_list)
+            if similarity >= SUS_THRESHOLD:
+                item.setBackground(Qt.red)
 
     def view_details(self, item):
         files = item.text().split(' and ')
