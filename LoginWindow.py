@@ -1,4 +1,7 @@
 import datetime
+
+from PyQt5.QtGui import QIcon
+
 from RegisterDialog import load_user_data
 from MainWindow import MainWindow
 from RegisterDialog import RegisterDialog
@@ -12,6 +15,7 @@ class LoginWindow(QMainWindow):
     def initUI(self):
         self.setWindowTitle('Login')
         self.setGeometry(100, 100, 300, 200)
+        self.setWindowIcon(QIcon("icon.png"))
 
         layout = QVBoxLayout()
 

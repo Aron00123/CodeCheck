@@ -5,6 +5,7 @@ import datetime
 from difflib import SequenceMatcher
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 
 from FileSelectionDialog import FileSelectionDialog
 from HistoryWindow import HistoryWindow
@@ -23,6 +24,7 @@ class MainWindow(QMainWindow):
     def initUI(self):
         self.setWindowTitle('Code Duplication Checker')
         self.setGeometry(100, 100, 800, 600)
+        self.setWindowIcon(QIcon("icon.png"))
 
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
