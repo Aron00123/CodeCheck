@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         self.login_time_label = QLabel(f'Login Time: {self.login_time}', self)
         layout.addWidget(self.login_time_label)
 
-        self.result_label = QLabel('Items in red are suspicious, please check manually.', self)
+        self.result_label = QLabel('<span style="color:red">Items in red are suspicious, please check manually.</span>', self)
         layout.addWidget(self.result_label)
 
         self.result_list = QListWidget(self)
