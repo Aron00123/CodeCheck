@@ -23,7 +23,6 @@ class MainWindow(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(200, 200, 1600, 600)
         self.setWindowTitle('Code Duplication Checker')
         self.setWindowIcon(QIcon("icon.png"))
 
@@ -38,7 +37,7 @@ class MainWindow(QMainWindow):
         self.history_button.clicked.connect(self.show_history)
         layout.addWidget(self.history_button)
 
-        self.login_time_label = QLabel(f'Login Time: {self.login_time}', self)
+        self.login_time_label = QLabel(f'Login Time: {self.login_time}                                                                 ', self)
         layout.addWidget(self.login_time_label)
 
         self.result_label = QLabel('<span style="color:red">Items in red are suspicious, please check manually.</span>', self)

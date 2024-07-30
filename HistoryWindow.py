@@ -18,14 +18,14 @@ class HistoryWindow(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(400, 400, 1800, 600)
+        self.setMinimumHeight(400)
         self.setWindowTitle('History')
         self.setWindowIcon(QIcon("icon.png"))
 
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
 
-        layout.addWidget(QLabel('Timestamp | Base | Compare | Similarity'))
+        layout.addWidget(QLabel('Timestamp | Base | Compare | Similarity                                                                                    '))
 
         self.history_list = QListWidget(self)
         self.history_list.itemClicked.connect(self.view_history_details)
