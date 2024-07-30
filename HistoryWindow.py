@@ -4,9 +4,11 @@ import astor
 from difflib import SequenceMatcher
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QListWidget, QTextEdit, QListWidgetItem
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QListWidget, QTextEdit, QListWidgetItem, QLabel
 
 import Constants
+from DiffWindow import DiffWindow
 
 
 class HistoryWindow(QMainWindow):
@@ -16,11 +18,14 @@ class HistoryWindow(QMainWindow):
         self.initUI()
 
     def initUI(self):
+        self.setGeometry(400, 400, 1800, 600)
         self.setWindowTitle('History')
-        self.setGeometry(150, 150, 600, 400)
+        self.setWindowIcon(QIcon("icon.png"))
 
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
+
+        layout.addWidget(QLabel('Timestamp | Base | Compare | Similarity'))
 
         self.history_list = QListWidget(self)
         self.history_list.itemClicked.connect(self.view_history_details)
@@ -38,7 +43,7 @@ class HistoryWindow(QMainWindow):
                     for record in history[self.username]:
                         similarity = f'{record['similarity'] * 100:.2f}%'
                         item = QListWidgetItem(
-                            f"{record['timestamp']} - Base: {record['base_file']} - Compare: {record['compare_file']} - Similarity: {similarity}",
+                            f"{record['timestamp']} | {record['base_file']} | {record['compare_file']} | {similarity}",
                             self.history_list
                         )
                         if record['similarity'] > Constants.SUS_THRESHOLD:
@@ -47,9 +52,10 @@ class HistoryWindow(QMainWindow):
             pass
 
     def view_history_details(self, item):
-        record = item.text().split(' - ')
-        base_file = record[1].split(': ')[1]
-        compare_file = record[2].split(': ')[1]
+        # 'Timestamp | Base | Compare | Similarity'
+        record = item.text().split(' | ')
+        base_file = record[1]
+        compare_file = record[2]
         content1 = read_file(base_file)
         content2 = read_file(compare_file)
         similar_blocks, lines1, lines2 = find_similar_blocks(content1, content2)
@@ -57,26 +63,7 @@ class HistoryWindow(QMainWindow):
         self.show_diff(highlighted_content1, highlighted_content2)
 
     def show_diff(self, highlighted_content1, highlighted_content2):
-        diff_window = QMainWindow(self)
-        diff_window.setWindowTitle('Code Comparison')
-        diff_window.setGeometry(150, 150, 600, 400)
-
-        diff_text_edit1 = QTextEdit(diff_window)
-        diff_text_edit1.setHtml(highlighted_content1)
-        diff_text_edit1.setReadOnly(True)
-
-        diff_text_edit2 = QTextEdit(diff_window)
-        diff_text_edit2.setHtml(highlighted_content2)
-        diff_text_edit2.setReadOnly(True)
-
-        layout = QVBoxLayout()
-        layout.addWidget(diff_text_edit1)
-        layout.addWidget(diff_text_edit2)
-        container = QWidget()
-        container.setLayout(layout)
-        diff_window.setCentralWidget(container)
-
-        diff_window.show()
+        DiffWindow(self, highlighted_content1, highlighted_content2)
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:

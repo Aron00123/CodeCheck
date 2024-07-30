@@ -13,8 +13,10 @@ class LoginWindow(QMainWindow):
         self.initUI()
 
     def initUI(self):
+        # setGeometry(x, y, w, h)
+        # 其中 (x, y) 是窗口的左上角坐标（不包括窗框！）
+        self.setGeometry(200, 200, 500, 0)
         self.setWindowTitle('Login')
-        self.setGeometry(100, 100, 300, 200)
         self.setWindowIcon(QIcon("icon.png"))
 
         layout = QVBoxLayout()

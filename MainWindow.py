@@ -8,10 +8,12 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 
 import Constants
+from DiffWindow import DiffWindow
 from FileSelectionDialog import FileSelectionDialog
 from HistoryWindow import HistoryWindow
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, \
-    QVBoxLayout, QPushButton, QListWidgetItem
+    QVBoxLayout, QPushButton, QListWidgetItem, QHBoxLayout
+
 
 class MainWindow(QMainWindow):
     def __init__(self, username, login_time):
@@ -21,8 +23,8 @@ class MainWindow(QMainWindow):
         self.initUI()
 
     def initUI(self):
+        self.setGeometry(200, 200, 1600, 600)
         self.setWindowTitle('Code Duplication Checker')
-        self.setGeometry(100, 100, 800, 600)
         self.setWindowIcon(QIcon("icon.png"))
 
         central_widget = QWidget()
@@ -90,26 +92,7 @@ class MainWindow(QMainWindow):
         self.show_diff(highlighted_content1, highlighted_content2)
 
     def show_diff(self, highlighted_content1, highlighted_content2):
-        diff_window = QMainWindow(self)
-        diff_window.setWindowTitle('Code Comparison')
-        diff_window.setGeometry(150, 150, 600, 400)
-
-        diff_text_edit1 = QTextEdit(diff_window)
-        diff_text_edit1.setHtml(highlighted_content1)
-        diff_text_edit1.setReadOnly(True)
-
-        diff_text_edit2 = QTextEdit(diff_window)
-        diff_text_edit2.setHtml(highlighted_content2)
-        diff_text_edit2.setReadOnly(True)
-
-        layout = QVBoxLayout()
-        layout.addWidget(diff_text_edit1)
-        layout.addWidget(diff_text_edit2)
-        container = QWidget()
-        container.setLayout(layout)
-        diff_window.setCentralWidget(container)
-
-        diff_window.show()
+        DiffWindow(self, highlighted_content1, highlighted_content2)
     
     def show_history(self):
         self.history_window = HistoryWindow(self.username)
