@@ -15,18 +15,15 @@ class LoginWindow(QMainWindow):
     def initUI(self):
         # setGeometry(x, y, w, h)
         # 其中 (x, y) 是窗口的左上角坐标（不包括窗框！）
-        self.setGeometry(200, 200, 0, 0)
         self.setWindowTitle('Login')
         self.setWindowIcon(QIcon("icon.png"))
 
         layout = QVBoxLayout()
 
-        self.label_username = QLabel('Enter your username:', self)
+        self.label_username = QLabel('Enter your username:          ', self)
         self.username = QLineEdit(self)
-        self.username.setMinimumWidth(500)
-        self.label_password = QLabel('Enter your password:', self)
+        self.label_password = QLabel('Enter your password:          ', self)
         self.password = QLineEdit(self)
-        self.password.setMinimumWidth(500)
         self.password.setEchoMode(QLineEdit.Password)
 
         self.login_button = QPushButton('Login', self)

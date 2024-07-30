@@ -8,8 +8,6 @@ from LoginWindow import LoginWindow
 from PyQt5.QtWidgets import QApplication
 
 def main():
-    # QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-    # QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
     # 为程序设置独立的 ID，让任务栏图标能够正常显示
     # https://stackoverflow.com/a/1552105/20025220
     if platform.system() == 'Windows':
