@@ -7,12 +7,11 @@ from difflib import SequenceMatcher
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 
+import Constants
 from FileSelectionDialog import FileSelectionDialog
 from HistoryWindow import HistoryWindow
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, \
     QVBoxLayout, QPushButton, QListWidgetItem
-
-SUS_THRESHOLD = 0.6 # float between 0 and 1
 
 class MainWindow(QMainWindow):
     def __init__(self, username, login_time):
@@ -72,13 +71,13 @@ class MainWindow(QMainWindow):
             content2 = read_file(compare_file)
             overall_similarity = calculate_overall_similarity(content1.splitlines(), content2.splitlines())
             duplicates.append((base_file, compare_file, overall_similarity))
-        save_history(self.username, base_file, compare_files)
+        save_history(self.username, duplicates)
 
     def display_results(self, duplicates):
         self.result_list.clear()
         for file1, file2, similarity in duplicates:
             item = QListWidgetItem(f'{file1} and {file2} are {similarity * 100:.2f}% similar', self.result_list)
-            if similarity >= SUS_THRESHOLD:
+            if similarity >= Constants.SUS_THRESHOLD:
                 item.setBackground(Qt.red)
 
     def view_details(self, item):
@@ -213,7 +212,7 @@ def calculate_overall_similarity(lines1, lines2):
 
     return sum(similarities) / len(similarities)
 
-def save_history(username, base_file, compare_files):
+def save_history(username, duplicates: list):
     history = {}
     try:
         with open('history.json', 'r') as file:
@@ -223,12 +222,14 @@ def save_history(username, base_file, compare_files):
     
     if username not in history:
         history[username] = []
-    
-    history[username].append({
-        'base_file': base_file,
-        'compare_files': compare_files,
-        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    })
+
+    for duplicate in duplicates:
+        history[username].append({
+            'base_file': duplicate[0],
+            'compare_file': duplicate[1],
+            'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), # unused
+            'similarity': duplicate[2],
+        })
     
     with open('history.json', 'w') as file:
         json.dump(history, file)

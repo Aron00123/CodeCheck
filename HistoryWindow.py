@@ -2,7 +2,12 @@ import json
 import ast
 import astor
 from difflib import SequenceMatcher
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QListWidget, QTextEdit
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QListWidget, QTextEdit, QListWidgetItem
+
+import Constants
+
 
 class HistoryWindow(QMainWindow):
     def __init__(self, username):
@@ -31,8 +36,13 @@ class HistoryWindow(QMainWindow):
                 history = json.load(file)
                 if self.username in history:
                     for record in history[self.username]:
-                        for file in record['compare_files']:
-                            self.history_list.addItem(f"{record['timestamp']} - Base: {record['base_file']} - Compare: {file}")
+                        similarity = f'{record['similarity'] * 100:.2f}%'
+                        item = QListWidgetItem(
+                            f"{record['timestamp']} - Base: {record['base_file']} - Compare: {record['compare_file']} - Similarity: {similarity}",
+                            self.history_list
+                        )
+                        if record['similarity'] > Constants.SUS_THRESHOLD:
+                            item.setBackground(Qt.red)
         except FileNotFoundError:
             pass
 
