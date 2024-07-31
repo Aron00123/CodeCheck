@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         self.login_time_label = QLabel(f'Login Time: {self.login_time}                                                                 ', self)
         layout.addWidget(self.login_time_label)
 
-        self.result_label = QLabel('<span style="color:red">Items in red are suspicious, please check manually.</span>', self)
+        self.result_label = QLabel('<span style="color:red">Items in yellow are suspicious, please check manually.</span>', self)
         layout.addWidget(self.result_label)
 
         self.result_list = QListWidget(self)
@@ -149,12 +149,12 @@ class MainWindow(QMainWindow):
         item = self.result_list.itemAt(position)
         if item:
             menu = QMenu()
-            if item.background() == Qt.red:
-                action = menu.addAction("Unmark as Plagiarism")
-                action.triggered.connect(lambda: self.unmark_as_plagiarism(item))
-            else:
-                action = menu.addAction("Mark as Plagiarism")
-                action.triggered.connect(lambda: self.mark_as_plagiarism(item))
+            # if item.background() == Qt.red:
+            action = menu.addAction("Unmark as Plagiarism")
+            action.triggered.connect(lambda: self.unmark_as_plagiarism(item))
+            # else:
+            action = menu.addAction("Mark as Plagiarism")
+            action.triggered.connect(lambda: self.mark_as_plagiarism(item))
             menu.exec_(self.result_list.viewport().mapToGlobal(position))
 
     def mark_as_plagiarism(self, item):
