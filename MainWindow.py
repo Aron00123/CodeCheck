@@ -12,7 +12,7 @@ from PyQt5.QtGui import QIcon
 import Constants
 from DiffWindow import DiffWindow
 from FileSelectionDialog import FileSelectionDialog
-from FileSelectionDialog2 import FileSelectionDialog2
+from ExportDialog import ExportDialog
 from HistoryWindow import HistoryWindow
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, \
     QVBoxLayout, QPushButton, QListWidgetItem, QHBoxLayout, QMenu
@@ -117,7 +117,7 @@ class MainWindow(QMainWindow):
         all_files = self.imported_files
 
         # Open the file selection dialog
-        dialog = FileSelectionDialog2(list(all_files), self)
+        dialog = ExportDialog(list(all_files), self)
         # Preselect all files in red-background items
         preselect_files = set()
         for i in range(self.result_list.count()):
