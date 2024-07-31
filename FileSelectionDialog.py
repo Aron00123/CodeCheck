@@ -1,5 +1,7 @@
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDialog, QScrollArea, QVBoxLayout, QHBoxLayout, QDialog, QRadioButton, QCheckBox, QPushButton
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDialog, QScrollArea, QVBoxLayout, QHBoxLayout, QDialog, \
+    QRadioButton, QCheckBox, QPushButton, QSizePolicy
+
 
 class FileSelectionDialog(QDialog):
     def __init__(self, files, parent=None):
@@ -11,7 +13,6 @@ class FileSelectionDialog(QDialog):
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(400, 400, 1400, 600)
         self.setWindowTitle('Select Files for Comparison')
         self.setWindowIcon(QIcon("icon.png"))
 
@@ -46,7 +47,7 @@ class FileSelectionDialog(QDialog):
 
         layout.addWidget(scroll_area)
 
-        ok_button = QPushButton('OK', self)
+        ok_button = QPushButton('                                                                OK                                                                ', self)
         ok_button.clicked.connect(self.on_ok)
         layout.addWidget(ok_button)
 

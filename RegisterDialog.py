@@ -21,13 +21,12 @@ class RegisterDialog(QDialog):
 
     def initUI(self):
         self.setWindowTitle('Register')
-        self.setGeometry(100, 100, 300, 200)
 
         layout = QVBoxLayout()
 
-        self.label_username = QLabel('Enter new username:', self)
+        self.label_username = QLabel('Enter new username:     ', self)
         self.username = QLineEdit(self)
-        self.label_password = QLabel('Enter new password:', self)
+        self.label_password = QLabel('Enter new password:     ', self)
         self.password = QLineEdit(self)
         self.password.setEchoMode(QLineEdit.Password)
 

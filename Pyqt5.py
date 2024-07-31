@@ -1,6 +1,9 @@
 import ctypes
 import sys
 import platform
+
+from PyQt5 import QtWidgets, QtCore
+
 from LoginWindow import LoginWindow
 from PyQt5.QtWidgets import QApplication
 
@@ -9,6 +12,7 @@ def main():
     # https://stackoverflow.com/a/1552105/20025220
     if platform.system() == 'Windows':
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('codecheck')
+
     app = QApplication(sys.argv)
     login_window = LoginWindow()
     login_window.show()
