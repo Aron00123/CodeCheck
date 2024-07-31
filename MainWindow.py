@@ -12,6 +12,7 @@ from PyQt5.QtGui import QIcon
 import Constants
 from DiffWindow import DiffWindow
 from FileSelectionDialog import FileSelectionDialog
+from FileSelectionDialog2 import FileSelectionDialog2
 from HistoryWindow import HistoryWindow
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, \
     QVBoxLayout, QPushButton, QListWidgetItem, QHBoxLayout
@@ -111,18 +112,31 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage('No suspicious code to export')
             return
 
-        options = QFileDialog.Options()
-        file_path, _ = QFileDialog.getSaveFileName(self, "Export Suspicious Code", "",
-                                                   "Zip Files (*.zip);;All Files (*)", options=options)
-        if file_path:
-            with zipfile.ZipFile(file_path, 'w') as zipf:
-                for idx, (file1, file2, similarity) in enumerate(self.suspicious_code_blocks):
-                    with open(file1, 'r', encoding='utf-8') as f1, open(file2, 'r', encoding='utf-8') as f2:
-                        file1_content = f1.read()
-                        file2_content = f2.read()
-                        zipf.writestr(f'{file1.split("/")[-1]}', file1_content)
-                        zipf.writestr(f'{file2.split("/")[-1]}', file2_content)
-            self.statusBar().showMessage('Suspicious code exported successfully')
+        # Collect all compared files
+        compared_files = set()
+        for file1, file2, _ in self.suspicious_code_blocks:
+            compared_files.add(file1)
+            compared_files.add(file2)
+
+        # Open the file selection dialog
+        dialog = FileSelectionDialog2(list(compared_files), self)
+        if dialog.exec_():
+            files_to_export = dialog.selected_files()
+            if not files_to_export:
+                self.statusBar().showMessage('No files selected for export')
+                return
+
+            # Open a save file dialog to choose the location to save the zip file
+            options = QFileDialog.Options()
+            file_path, _ = QFileDialog.getSaveFileName(self, "Export Suspicious Code", "",
+                                                       "Zip Files (*.zip);;All Files (*)", options=options)
+            if file_path:
+                with zipfile.ZipFile(file_path, 'w') as zipf:
+                    for file in files_to_export:
+                        with open(file, 'r', encoding='utf-8') as f:
+                            file_content = f.read()
+                            zipf.writestr(f'{file.split("/")[-1]}', file_content)
+                self.statusBar().showMessage('Suspicious code exported successfully')
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
