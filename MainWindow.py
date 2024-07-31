@@ -1,4 +1,6 @@
 import ast
+import zipfile
+
 import astor
 import json
 import datetime
@@ -20,6 +22,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.username = username
         self.login_time = login_time
+        self.suspicious_code_blocks = []  # Store suspicious code blocks
         self.initUI()
 
     def initUI(self):
@@ -37,6 +40,10 @@ class MainWindow(QMainWindow):
         self.history_button = QPushButton('History', self)
         self.history_button.clicked.connect(self.show_history)
         layout.addWidget(self.history_button)
+
+        self.export_button = QPushButton('Export Suspicious Code', self)  # New button
+        self.export_button.clicked.connect(self.export_suspicious_code)
+        layout.addWidget(self.export_button)
 
         self.login_time_label = QLabel(f'Login Time: {self.login_time}', self)
         layout.addWidget(self.login_time_label)
@@ -77,10 +84,12 @@ class MainWindow(QMainWindow):
 
     def display_results(self, duplicates):
         self.result_list.clear()
+        self.suspicious_code_blocks.clear()  # Clear previous suspicious code blocks
         for file1, file2, similarity in duplicates:
             item = QListWidgetItem(f'{file1} and {file2} are {similarity * 100:.2f}% similar', self.result_list)
             if similarity >= Constants.SUS_THRESHOLD:
                 item.setBackground(Qt.red)
+                self.suspicious_code_blocks.append((file1, file2, similarity))
 
     def view_details(self, item):
         files = item.text().split(' and ')
@@ -97,6 +106,24 @@ class MainWindow(QMainWindow):
     def show_history(self):
         self.history_window = HistoryWindow(self.username)
         self.history_window.show()
+
+    def export_suspicious_code(self):
+        if not self.suspicious_code_blocks:
+            self.statusBar().showMessage('No suspicious code to export')
+            return
+
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getSaveFileName(self, "Export Suspicious Code", "",
+                                                   "Zip Files (*.zip);;All Files (*)", options=options)
+        if file_path:
+            with zipfile.ZipFile(file_path, 'w') as zipf:
+                for idx, (file1, file2, similarity) in enumerate(self.suspicious_code_blocks):
+                    with open(file1, 'r', encoding='utf-8') as f1, open(file2, 'r', encoding='utf-8') as f2:
+                        file1_content = f1.read()
+                        file2_content = f2.read()
+                        zipf.writestr(f'{file1.split("/")[-1]}', file1_content)
+                        zipf.writestr(f'{file2.split("/")[-1]}', file2_content)
+            self.statusBar().showMessage('Suspicious code exported successfully')
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
