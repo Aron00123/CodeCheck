@@ -61,15 +61,17 @@ class MainWindow(QMainWindow):
 
     def import_files(self):
         options = QFileDialog.Options()
-        files, _ = QFileDialog.getOpenFileNames(self, "Import Code Files", "", "Python Files (*.py);;All Files (*)", options=options)
+        files, _ = QFileDialog.getOpenFileNames(self, "Import Code Files", "", "Python Files (*.py);;All Files (*)",
+                                                options=options)
         if len(files) >= 2:
             dialog = FileSelectionDialog(files, self)
             if dialog.exec_():
-                base_file = dialog.selected_base_file
+                base_files = dialog.selected_base_files
                 compare_files = dialog.selected_compare_files
-                if base_file and compare_files:
+                if base_files and compare_files:
                     duplicates = []
-                    self.compare_files(base_file, compare_files, duplicates)
+                    for base_file in base_files:
+                        self.compare_files(base_file, compare_files, duplicates)
                     self.display_results(duplicates)
         else:
             self.statusBar().showMessage('Please select at least 2 files')
