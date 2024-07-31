@@ -15,7 +15,7 @@ from FileSelectionDialog import FileSelectionDialog
 from FileSelectionDialog2 import FileSelectionDialog2
 from HistoryWindow import HistoryWindow
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QFileDialog, QListWidget, QTextEdit, \
-    QVBoxLayout, QPushButton, QListWidgetItem, QHBoxLayout
+    QVBoxLayout, QPushButton, QListWidgetItem, QHBoxLayout, QMenu
 
 
 class MainWindow(QMainWindow):
@@ -53,6 +53,8 @@ class MainWindow(QMainWindow):
 
         self.result_list = QListWidget(self)
         self.result_list.itemClicked.connect(self.view_details)
+        self.result_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.result_list.customContextMenuRequested.connect(self.show_context_menu)
         layout.addWidget(self.result_list)
 
         self.setCentralWidget(central_widget)
@@ -64,6 +66,7 @@ class MainWindow(QMainWindow):
         files, _ = QFileDialog.getOpenFileNames(self, "Import Code Files", "", "Python Files (*.py);;All Files (*)",
                                                 options=options)
         if len(files) >= 2:
+            self.imported_files = files  # Store all imported files
             dialog = FileSelectionDialog(files, self)
             if dialog.exec_():
                 base_files = dialog.selected_base_files
@@ -90,7 +93,7 @@ class MainWindow(QMainWindow):
         for file1, file2, similarity in duplicates:
             item = QListWidgetItem(f'{file1} and {file2} are {similarity * 100:.2f}% similar', self.result_list)
             if similarity >= Constants.SUS_THRESHOLD:
-                item.setBackground(Qt.red)
+                item.setBackground(Qt.yellow)
                 self.suspicious_code_blocks.append((file1, file2, similarity))
 
     def view_details(self, item):
@@ -104,24 +107,26 @@ class MainWindow(QMainWindow):
 
     def show_diff(self, highlighted_content1, highlighted_content2):
         DiffWindow(self, highlighted_content1, highlighted_content2)
-    
+
     def show_history(self):
         self.history_window = HistoryWindow(self.username)
         self.history_window.show()
 
     def export_suspicious_code(self):
-        if not self.suspicious_code_blocks:
-            self.statusBar().showMessage('No suspicious code to export')
-            return
-
-        # Collect all compared files
-        compared_files = set()
-        for file1, file2, _ in self.suspicious_code_blocks:
-            compared_files.add(file1)
-            compared_files.add(file2)
+        # Use all imported files
+        all_files = self.imported_files
 
         # Open the file selection dialog
-        dialog = FileSelectionDialog2(list(compared_files), self)
+        dialog = FileSelectionDialog2(list(all_files), self)
+        # Preselect all files in red-background items
+        preselect_files = set()
+        for i in range(self.result_list.count()):
+            item = self.result_list.item(i)
+            if item.background() == Qt.red:
+                text_parts = item.text().split(' ')
+                preselect_files.add(text_parts[0])
+                preselect_files.add(text_parts[2])
+        dialog.preselect_files(preselect_files)
         if dialog.exec_():
             files_to_export = dialog.selected_files()
             if not files_to_export:
@@ -139,6 +144,24 @@ class MainWindow(QMainWindow):
                             file_content = f.read()
                             zipf.writestr(f'{file.split("/")[-1]}', file_content)
                 self.statusBar().showMessage('Suspicious code exported successfully')
+
+    def show_context_menu(self, position):
+        item = self.result_list.itemAt(position)
+        if item:
+            menu = QMenu()
+            if item.background() == Qt.red:
+                action = menu.addAction("Unmark as Plagiarism")
+                action.triggered.connect(lambda: self.unmark_as_plagiarism(item))
+            else:
+                action = menu.addAction("Mark as Plagiarism")
+                action.triggered.connect(lambda: self.mark_as_plagiarism(item))
+            menu.exec_(self.result_list.viewport().mapToGlobal(position))
+
+    def mark_as_plagiarism(self, item):
+        item.setBackground(Qt.red)
+
+    def unmark_as_plagiarism(self, item):
+        item.setBackground(Qt.white)
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:

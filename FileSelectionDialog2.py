@@ -18,5 +18,10 @@ class FileSelectionDialog2(QDialog):
         self.buttons.rejected.connect(self.reject)
         self.layout.addWidget(self.buttons)
 
+    def preselect_files(self, files_to_preselect: set):
+        for checkbox in self.checkboxes:
+            if checkbox.text() in files_to_preselect:
+                checkbox.setChecked(True)
+
     def selected_files(self):
         return [checkbox.text() for checkbox in self.checkboxes if checkbox.isChecked()]
